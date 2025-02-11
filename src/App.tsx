@@ -17,10 +17,10 @@ const App: React.FC = () => {
     const checkOrientation = () => {
       setIsPortrait(window.innerHeight > window.innerWidth);
     };
-    
+
     checkOrientation();
     window.addEventListener("resize", checkOrientation);
-    
+
     return () => window.removeEventListener("resize", checkOrientation);
   }, []);
 
@@ -44,32 +44,55 @@ const App: React.FC = () => {
 
   // Start the camera stream
   useEffect(() => {
-    const startCamera = async () => {
-      if (!selectedCamera) return;
-
+    const checkAndStartCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: { exact: selectedCamera } },
-        });
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
+        // Check camera permission
+        const permission = await navigator.permissions.query({ name: "camera" as PermissionName });
+  
+        if (permission.state === "denied") {
+          alert("Camera access is blocked. Please enable it in your browser settings.");
+          return;
+        }
+  
+        // If permission is not granted, request it
+        if (permission.state === "prompt") {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach(track => track.stop()); // Close stream after requesting permission
+          } catch (error) {
+            console.error("Camera permission denied by user:", error);
+            alert("Camera access denied. Please allow camera permissions in your browser settings.");
+            return;
+          }
+        }
+  
+        // Start the camera with the selected device
+        if (selectedCamera) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { deviceId: { exact: selectedCamera } },
+          });
+  
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play();
+          }
         }
       } catch (error) {
         console.error("Error accessing the camera: ", error);
+        alert("Failed to access the camera. Please check your browser settings.");
       }
     };
-
-    startCamera();
-
+  
+    checkAndStartCamera();
+  
     return () => {
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
+        tracks.forEach(track => track.stop());
       }
     };
   }, [selectedCamera]);
+  
 
   const startCountdown = () => {
     setCountdown(countdownDuration);

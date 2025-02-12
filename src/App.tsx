@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
 
+
   // Detect screen orientation for mobile
   useEffect(() => {
     const checkOrientation = () => {
@@ -111,11 +112,37 @@ const App: React.FC = () => {
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
+      const videoWidth = videoRef.current.videoWidth;
+      const videoHeight = videoRef.current.videoHeight;
+      
       const canvas = canvasRef.current;
+      canvas.width = 1920; // 16:9 aspect ratio
+      canvas.height = 1080; // 16:9 aspect ratio
+      
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-
+        // Draw a transparent background to fill the canvas
+        ctx.fillStyle = "transparent";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+        // Calculate the position to draw the camera image
+        let x = 0;
+        let y = 0;
+        let width = canvas.width;
+        let height = canvas.height;
+      
+        if (videoWidth / videoHeight > canvas.width / canvas.height) {
+          height = canvas.width * (videoHeight / videoWidth);
+          y = (canvas.height - height) / 2;
+        } else {
+          width = canvas.height * (videoWidth / videoHeight);
+          x = (canvas.width - width) / 2;
+        }
+      
+        // Draw the camera image on the canvas without stretching
+        ctx.drawImage(videoRef.current, x, y, width, height);
+      
+        // Draw the frame image on the canvas
         const frameImage = new Image();
         frameImage.src = selectedFrame;
         frameImage.onload = () => {
@@ -133,8 +160,12 @@ const App: React.FC = () => {
           Please rotate your device to landscape mode.
         </div>
       )}
-
-      <h1 className="text-xl font-bold mb-4">#ChekiChoco</h1>
+      <div className="flex">
+        <a href="https://wargavi48.github.io" target="_blank">
+          <img src="spawn.gif" alt="ChekiChoco Logo" className="w-18 h-18 mr-2" />
+        </a>
+        <img src="logo_scaled.png" alt="ChekiChoco Logo" className="w-32 h-18 mr-2" />
+      </div>
 
       {/* Camera Selection */}
       <div className="mb-4 text-center">
@@ -164,16 +195,26 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Countdown Timer */}
-      {countdown > 0 && (
-        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl font-bold">
-          {countdown}
-        </div>
-      )}
+      {/* Frame Selector */}
+      <div className="mt-4 flex gap-2 justify-center">
+        {frames.map((frame, index) => (
+          <img
+            key={index}
+            src={frame}
+            alt={`Frame ${index + 1}`}
+            className={`w-16 h-9 rounded cursor-pointer border-2 ${
+              selectedFrame === frame ? "border-blue-500" : "border-gray-300"
+            }`}
+            onClick={() => setSelectedFrame(frame)}
+          />
+        ))}
+      </div>
 
       {/* Countdown Duration Selector */}
       <div className="mt-4 text-center">
-        <label className="mr-2">Countdown Duration:</label>
+        <label className="mr-2">Select timer:</label>
+      </div>
+      <div className="mt-4 text-center">
         <button
           onClick={() => setCountdownDuration(5)}
           className={`px-4 py-2 rounded ${countdownDuration === 5 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
@@ -188,33 +229,25 @@ const App: React.FC = () => {
         </button>
       </div>
 
+      {/* Countdown Timer */}
+      {countdown > 0 && (
+        <div className="text-center text-4xl font-bold mt-4">
+          {countdown}
+        </div>
+      )}
+
       {/* Capture Button */}
       <div className="mt-4 text-center">
         <button
           onClick={startCountdown}
-          className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+          className="inline-flex items-center rounded cursor-pointer bg-blue-500 px-6 py-3 font-semibold text-white transition [box-shadow:rgb(171,_196,245)-8px_8px] hover:[box-shadow:rgb(43,_127,_255)0px_0px]"
         >
           Capture Photo
         </button>
       </div>
 
-      {/* Frame Selector */}
-      <div className="mt-4 flex gap-2 justify-center">
-        {frames.map((frame, index) => (
-          <img
-            key={index}
-            src={frame}
-            alt={`Frame ${index + 1}`}
-            className={`w-16 h-16 rounded cursor-pointer border-2 ${
-              selectedFrame === frame ? "border-blue-500" : "border-gray-300"
-            }`}
-            onClick={() => setSelectedFrame(frame)}
-          />
-        ))}
-      </div>
-
       {/* Canvas (Hidden) */}
-      <canvas ref={canvasRef} className="hidden" width={640} height={480} />
+      <canvas ref={canvasRef} className="hidden" width={1920} height={1080} />
 
       {/* Captured Image Preview */}
       {capturedImage && (
@@ -223,12 +256,14 @@ const App: React.FC = () => {
           <img
             src={capturedImage}
             alt="Captured"
-            className="w-full max-w-2xl mx-auto rounded shadow-md"
-            style={{ aspectRatio: "16/9" }}
+            className="max-w-2xl mx-auto rounded shadow-md"
+            style={{ objectFit: "contain" }}
           />
-          <a href={capturedImage} download="captured-photo.png" className="block mt-2 text-blue-500 hover:underline">
-            Download Photo
-          </a>
+          <div className="mt-4">
+            <a href={capturedImage} download="captured-photo.png" className="inline-flex items-center rounded cursor-pointer bg-blue-500 px-6 py-3 font-semibold text-white transition [box-shadow:rgb(171,_196,245)-8px_8px] hover:[box-shadow:rgb(43,_127,_255)0px_0px]">
+              Download Photo
+            </a>
+          </div>
         </div>
       )}
     </div>

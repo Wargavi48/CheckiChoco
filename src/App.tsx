@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import './App.css';
 
 const App: React.FC = () => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMusicOn, setIsMusicOn] = useState<boolean>(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [frames] = useState<string[]>(["kana-frame.png", "tana-frame.png", "pia-frame.png"]);
@@ -25,6 +27,18 @@ const App: React.FC = () => {
 
     return () => window.removeEventListener("resize", checkOrientation);
   }, []);
+
+  // Background Music
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.05; // Set volume to 35%
+      if (isMusicOn) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isMusicOn]);
 
   // Get available cameras
   useEffect(() => {
@@ -162,9 +176,26 @@ const App: React.FC = () => {
           Please rotate your device to landscape mode.
         </div>
       )}
+
+      {/* Music Control */}
+      <div>
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setIsMusicOn(!isMusicOn)}
+          className="bg-[#ff9fb7] text-[#bb1f1d] px-4 py-2 rounded"
+          >
+            {isMusicOn ? "Pause Music" : "Play Music"}
+        </button>
+      </div>
+
+      {/* Audio Element */}
+        <audio ref={audioRef} src="hagavi_jkt48v.mp3" loop autoPlay />
+      </div>
+
+      {/* Logos */}
       <div className="flex">
         <a href="https://wargavi48.github.io" target="_blank">
-          <img src="spawn.gif" alt="ChekiChoco Logo" className="w-18 h-18 mr-2" />
+          <img src="spawn.gif" alt="Wargavi48 Logo" className="w-18 h-18 mr-2" />
         </a>
         <img src="logo_scaled.png" alt="ChekiChoco Logo" className="w-32 h-18 mr-2" />
       </div>

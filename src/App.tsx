@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
+  const [showTouchFeedback, setShowTouchFeedback] = useState<boolean>(false);
 
 
   // Detect screen orientation for mobile
@@ -27,6 +28,13 @@ const App: React.FC = () => {
 
     return () => window.removeEventListener("resize", checkOrientation);
   }, []);
+
+  // Function to handle touch feedback
+  const handleTouchStart = () => {
+    setShowTouchFeedback(true);
+    setTimeout(() => setShowTouchFeedback(false), 300); // Hide feedback after 300ms
+    startCountdown(); // Start the countdown
+  };
 
   // Background Music
   useEffect(() => {
@@ -236,7 +244,10 @@ const App: React.FC = () => {
       </div>
 
       {/* Video Preview*/}
-      <div className="relative w-full max-w-2xl mx-auto" style={{ aspectRatio: "16/9" }}>
+      <div className="relative w-full max-w-2xl mx-auto"
+        style={{ aspectRatio: "16/9" }}
+        onTouchStart={() => startCountdown()} // Add touch event listener
+        >        
         {/* Video Element */}
         <video ref={videoRef} className="w-full h-full rounded shadow-md" autoPlay muted playsInline />
 
@@ -247,6 +258,13 @@ const App: React.FC = () => {
             alt="Selected Frame"
             className="absolute inset-0 w-full h-full pointer-events-none"
           />
+        )}
+
+        {/* Touch Feedback Overlay */}
+        {showTouchFeedback && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded">
+            <div className="text-white text-2xl font-bold">Tap to Capture!</div>
+          </div>
         )}
 
         {/* Countdown Overlay */}

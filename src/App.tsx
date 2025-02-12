@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import './App.css';
 
 const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -155,9 +156,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="p-4 relative">
+    <div className="w-screen min-h-screen bg-[#FBDEEB] bg-[linear-gradient(to_bottom,#F8BDD7_1px,transparent_1px),linear-gradient(to_right,#F8BDD7_1px,transparent_1px)] [background-size:30px_30px] bg-center overflow-x-hidden animate-bgmove p-4 relative">
       {isPortrait && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 text-white text-xl font-bold z-50">
+        <div className="handwrite fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 text-white text-4xl z-50">
           Please rotate your device to landscape mode.
         </div>
       )}
@@ -169,19 +170,38 @@ const App: React.FC = () => {
       </div>
 
       {/* Camera Selection */}
-      <div className="mb-4 text-center">
-        <label className="mr-2 font-semibold">Select Camera:</label>
-        <select
-          className="border p-2 rounded"
-          onChange={(e) => setSelectedCamera(e.target.value)}
-          value={selectedCamera || ""}
-        >
-          {cameras.map((camera) => (
-            <option key={camera.deviceId} value={camera.deviceId}>
-              {camera.label || "Camera"}
-            </option>
-          ))}
-        </select>
+      <div className="mx-auto flex items-center justify-center pb-4">
+        <div className="group relative cursor-pointer py-1">
+          {/* Selected Block */}
+          <div className="flex items-center justify-between space-x-3 bg-[#ff9fb7] px-3 py-1 rounded-full shadow-md">
+            <a 
+              className="menu-hover text-sm font-medium text-[#bb1f1d] lg:mx-2" 
+              onClick={() => console.log("Choose Camera")}
+            >
+              {selectedCamera 
+                ? cameras.find(c => c.deviceId === selectedCamera)?.label || "Camera"
+                : "Choose Camera"}
+            </a>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-4 w-4 text-[#bb1f1d]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </span>
+          </div>
+
+          {/* Options */}
+          <div className="invisible absolute z-50 flex w-full flex-col bg-[#FCFBF0] py-1 px-2 text-gray-800 shadow-xl group-hover:visible rounded-lg">
+            {cameras.map((camera) => (
+              <a 
+                key={camera.deviceId} 
+                className="my-1 block py-1 text-sm font-semibold text-[#5d402d] hover:bg-[#f5c081] hover:text-[#5d402d] rounded-full md:mx-1" // Brown text, pink background, dark gray text on hover, rounded
+                onClick={() => setSelectedCamera(camera.deviceId)}
+              >
+                {camera.label || "Camera"}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Video Preview */}
@@ -204,44 +224,78 @@ const App: React.FC = () => {
             src={frame}
             alt={`Frame ${index + 1}`}
             className={`w-16 h-9 rounded cursor-pointer border-2 ${
-              selectedFrame === frame ? "border-blue-500" : "border-gray-300"
+              selectedFrame === frame ? "border-[#bb1f1d]" : "border-gray-300"
             }`}
             onClick={() => setSelectedFrame(frame)}
           />
         ))}
       </div>
 
-      {/* Countdown Duration Selector */}
-      <div className="mt-4 text-center">
-        <label className="mr-2">Select timer:</label>
-      </div>
-      <div className="mt-4 text-center">
-        <button
-          onClick={() => setCountdownDuration(5)}
-          className={`px-4 py-2 rounded ${countdownDuration === 5 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-        >
-          5 Seconds
-        </button>
-        <button
-          onClick={() => setCountdownDuration(10)}
-          className={`ml-2 px-4 py-2 rounded ${countdownDuration === 10 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-        >
-          10 Seconds
-        </button>
-      </div>
-
-      {/* Countdown Timer */}
-      {countdown > 0 && (
-        <div className="text-center text-4xl font-bold mt-4">
-          {countdown}
+      {/* Countdown Duration Selector and Timer */}
+      <div className="mt-4 text-center space-y-4">
+        <div className="space-x-2">
+          <span className="handwrite text-2xl text-gray-800 font-medium">Select timer:</span>
+          {[5, 10].map((duration) => (
+            <button
+              key={duration}
+              onClick={() => setCountdownDuration(duration)}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                countdownDuration === duration
+                  ? "bg-[#bb1f1d] text-white shadow-lg"
+                  : "bg-[#5d402d] text-gray-800 hover:bg-[#f5c081] text-gray-800"
+              }`}
+            >
+              {duration} Seconds
+            </button>
+          ))}
         </div>
-      )}
+
+        {countdown > 0 && (
+          <div className="relative flex items-center justify-center w-40 h-40 mx-auto">
+            {/* Circular Progress Background */}
+            <div className="absolute w-full h-full">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  className="text-gray-200 stroke-current"
+                  stroke-width="8"
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                ></circle>
+              </svg>
+            </div>
+
+            {/* Animated Progress Circle */}
+            <div className="absolute w-full h-full">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  className="text-[#f5c081] stroke-current"
+                  stroke-width="8"
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset={`calc(251.2 - (251.2 * ${countdown}) / ${countdownDuration})`}
+                  style={{ transition: "stroke-dashoffset 1s linear" }}
+                ></circle>
+              </svg>
+            </div>
+
+            {/* Countdown Text */}
+            <div className="handwrite text-6xl font-bold text-[#bb1f1d] animate-pulse">
+              {countdown}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Capture Button */}
       <div className="mt-4 text-center">
         <button
           onClick={startCountdown}
-          className="inline-flex items-center rounded cursor-pointer bg-blue-500 px-6 py-3 font-semibold text-white transition [box-shadow:rgb(171,_196,245)-8px_8px] hover:[box-shadow:rgb(43,_127,_255)0px_0px]"
+          className="inline-flex items-center rounded cursor-pointer bg-[#ff9fb7] px-6 py-3 font-semibold text-[#bb1f1d] transition [box-shadow:rgb(251,202,224)-8px_8px] hover:[box-shadow:rgb(251,202,224)0px_0px]"
         >
           Capture Photo
         </button>
@@ -253,7 +307,7 @@ const App: React.FC = () => {
       {/* Captured Image Preview */}
       {capturedImage && (
         <div className="mt-4 text-center">
-          <h2 className="text-lg font-semibold mb-2">Captured Photo</h2>
+          <h2 className="handwrite text-4xl text-gray-800 mb-2">Captured Photo</h2>
           <img
             src={capturedImage}
             alt="Captured"
@@ -261,7 +315,9 @@ const App: React.FC = () => {
             style={{ objectFit: "contain" }}
           />
           <div className="mt-4">
-            <a href={capturedImage} download="captured-photo.png" className="inline-flex items-center rounded cursor-pointer bg-blue-500 px-6 py-3 font-semibold text-white transition [box-shadow:rgb(171,_196,245)-8px_8px] hover:[box-shadow:rgb(43,_127,_255)0px_0px]">
+            <a href={capturedImage} download="captured-photo.png"
+              className="inline-flex items-center rounded cursor-pointer bg-[#ff9fb7] px-6 py-3 font-semibold text-[#bb1f1d] transition [box-shadow:rgb(251,202,224)-8px_8px] hover:[box-shadow:rgb(251,202,224)0px_0px]"
+              >
               Download Photo
             </a>
           </div>

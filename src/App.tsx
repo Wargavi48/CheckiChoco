@@ -55,17 +55,18 @@ const App: React.FC = () => {
           return;
         }
   
-        // If permission is not granted, request it
-        if (permission.state === "prompt") {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            stream.getTracks().forEach(track => track.stop()); // Close stream after requesting permission
-          } catch (error) {
-            console.error("Camera permission denied by user:", error);
-            alert("Camera access denied. Please allow camera permissions in your browser settings.");
-            return;
-          }
+      // If permission is not granted, request it
+      if (permission.state === "prompt") {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          stream.getTracks().forEach(track => track.stop()); // Close stream after requesting permission
+          window.location.reload(); // Reload the page after permission is granted
+        } catch (error) {
+          console.error("Camera permission denied by user:", error);
+          alert("Camera access denied. Please allow camera permissions in your browser settings.");
+          return;
         }
+      }
   
         // Start the camera with the selected device
         if (selectedCamera) {

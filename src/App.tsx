@@ -184,7 +184,7 @@ const App: React.FC = () => {
           onClick={() => setIsMusicOn(!isMusicOn)}
           className="bg-[#ff9fb7] text-[#bb1f1d] px-4 py-2 rounded"
           >
-            {isMusicOn ? "Pause Music" : "Play Music"}
+            {isMusicOn ? "Mute Music" : "Play Music"}
         </button>
       </div>
 
@@ -235,15 +235,43 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Video Preview */}
+      {/* Video Preview*/}
       <div className="relative w-full max-w-2xl mx-auto" style={{ aspectRatio: "16/9" }}>
+        {/* Video Element */}
         <video ref={videoRef} className="w-full h-full rounded shadow-md" autoPlay muted playsInline />
+
+        {/* Selected Frame Overlay */}
         {selectedFrame && (
           <img
             src={selectedFrame}
             alt="Selected Frame"
             className="absolute inset-0 w-full h-full pointer-events-none"
           />
+        )}
+
+        {/* Countdown Overlay */}
+        {countdown > 0 && (
+          <div className="absolute inset-0 flex items-center animate-pulse bg-opacity-50 justify-center">
+            {/* Animated Progress Circle */}
+            <div className="absolute w-full h-full">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  className="text-[#f5c081] stroke-current"
+                  stroke-width="8"
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset={`calc(251.2 - (251.2 * ${countdown}) / ${countdownDuration})`}
+                  style={{ transition: "stroke-dashoffset 1s linear" }}
+                ></circle>
+              </svg>
+            </div>
+            <div className="handwrite text-6xl font-bold text-[#bb1f1d] animate-pulse bg-white bg-opacity-50 rounded-full p-8">
+              {countdown}
+            </div>
+          </div>
         )}
       </div>
 
@@ -262,7 +290,7 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      {/* Countdown Duration Selector and Timer */}
+      {/* Countdown Duration Selector*/}
       <div className="mt-4 text-center space-y-4">
         <div className="space-x-2">
           <span className="handwrite text-2xl text-gray-800 font-medium">Select timer:</span>
@@ -280,46 +308,6 @@ const App: React.FC = () => {
             </button>
           ))}
         </div>
-
-        {countdown > 0 && (
-          <div className="relative flex items-center justify-center w-40 h-40 mx-auto">
-            {/* Circular Progress Background */}
-            <div className="absolute w-full h-full">
-              <svg className="w-full h-full" viewBox="0 0 100 100">
-                <circle
-                  className="text-gray-200 stroke-current"
-                  stroke-width="8"
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="transparent"
-                ></circle>
-              </svg>
-            </div>
-
-            {/* Animated Progress Circle */}
-            <div className="absolute w-full h-full">
-              <svg className="w-full h-full" viewBox="0 0 100 100">
-                <circle
-                  className="text-[#f5c081] stroke-current"
-                  stroke-width="8"
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="transparent"
-                  stroke-dasharray="251.2"
-                  stroke-dashoffset={`calc(251.2 - (251.2 * ${countdown}) / ${countdownDuration})`}
-                  style={{ transition: "stroke-dashoffset 1s linear" }}
-                ></circle>
-              </svg>
-            </div>
-
-            {/* Countdown Text */}
-            <div className="handwrite text-6xl font-bold text-[#bb1f1d] animate-pulse">
-              {countdown}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Capture Button */}
